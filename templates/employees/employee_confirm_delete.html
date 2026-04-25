@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Employee{% endblock %}
+{% block page_title %}Delete Employee{% endblock %}
+
+{% block content %}
+<div style="max-width:500px;margin:0 auto;">
+  <div class="card-panel p-4 text-center">
+    <div style="width:64px;height:64px;background:#fff0f0;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+      <i class="bi bi-trash" style="font-size:24px;color:var(--accent);"></i>
+    </div>
+    <h5 style="font-family:var(--font-head);font-weight:700;margin-bottom:8px;">Delete Employee</h5>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:24px;">
+      Are you sure you want to delete <strong>{{ employee.user.get_full_name }}</strong> ({{ employee.employee_id }})?
+      This action cannot be undone.
+    </p>
+    <div class="d-flex gap-2 justify-content-center">
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn-accent" style="background:#e94560;">
+          <i class="bi bi-trash"></i> Yes, Delete
+        </button>
+      </form>
+      <a href="{% url 'employee_list' %}" class="btn-outline-custom">
+        <i class="bi bi-x-circle"></i> Cancel
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

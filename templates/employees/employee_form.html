@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if employee %}Edit Employee{% else %}Add Employee{% endif %}{% endblock %}
+{% block page_title %}{% if employee %}Edit Employee{% else %}Add Employee{% endif %}{% endblock %}
+{% block page_subtitle %}{% if employee %}Editing {{ employee.user.get_full_name }}{% else %}Create a new employee{% endif %}{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="row g-3">
+
+    <!-- LEFT COLUMN -->
+    <div class="col-lg-8">
+
+      <!-- Personal Info -->
+      <div class="form-card mb-3">
+        <div class="form-section-title"><i class="bi bi-person-fill me-2" style="color:var(--accent);"></i>Personal Information</div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label-custom">First Name *</label>
+            <input type="text" name="first_name" class="form-control-custom" required
+                   value="{{ employee.user.first_name|default:'' }}" placeholder="First name"/>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">Last Name *</label>
+            <input type="text" name="last_name" class="form-control-custom" required
+                   value="{{ employee.user.last_name|default:'' }}" placeholder="Last name"/>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">Email *</label>
+            <input type="email" name="email" class="form-control-custom" required
+                   value="{{ employee.user.email|default:'' }}" placeholder="email@example.com"/>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">Phone</label>
+            <input type="text" name="phone" class="form-control-custom"
+                   value="{{ employee.phone|default:'' }}" placeholder="+977 98XXXXXXXX"/>
+          </div>
+          <div class="col-12">
+            <label class="form-label-custom">Address</label>
+            <textarea name="address" class="form-control-custom" rows="2"
+                      placeholder="Full address">{{ employee.address|default:'' }}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Employment Details -->
+      <div class="form-card mb-3">
+        <div class="form-section-title"><i class="bi bi-briefcase-fill me-2" style="color:var(--accent);"></i>Employment Details</div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label-custom">Employee ID *</label>
+            <input type="text" name="employee_id" class="form-control-custom" required
+                   value="{{ employee.employee_id|default:'' }}" placeholder="EMP-001"
+                   {% if employee %}readonly{% endif %}/>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">Date of Joining *</label>
+            <input type="date" name="date_joined" class="form-control-custom" required
+                   value="{{ employee.date_joined|date:'Y-m-d'|default:'' }}"/>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">Department *</label>
+            <select name="department" class="form-control-custom" required>
+              <option value="">Select Department</option>
+              {% for dept in departments %}
+                <option value="{{ dept.pk }}"
+                  {% if employee.department.pk == dept.pk %}selected{% endif %}>
+                  {{ dept.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">Designation</label>
+            <select name="designation" class="form-control-custom">
+              <option value="">Select Designation</option>
+              {% for des in designations %}
+                <option value="{{ des.pk }}"
+                  {% if employee.designation.pk == des.pk %}selected{% endif %}>
+                  {{ des.title }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">Employee Type *</label>
+            <select name="employee_type" class="form-control-custom" required>
+              <option value="full_time" {% if employee.employee_type == 'full_time' %}selected{% endif %}>Full Time</option>
+              <option value="part_time" {% if employee.employee_type == 'part_time' %}selected{% endif %}>Part Time</option>
+              <option value="contract"  {% if employee.employee_type == 'contract'  %}selected{% endif %}>Contract</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-custom">Status</label>
+            <select name="is_active" class="form-control-custom">
+              <option value="true"  {% if employee.is_active or not employee %}selected{% endif %}>Active</option>
+              <option value="false" {% if employee and not employee.is_active %}selected{% endif %}>Inactive</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Salary (only on Add) -->
+      {% if not employee %}
+      <div class="form-card mb-3">
+        <div class="form-section-title"><i class="bi bi-cash-stack me-2" style="color:var(--accent);"></i>Salary Structure</div>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label-custom">Basic Salary (Rs.) *</label>
+            <input type="number" name="basic_salary" class="form-control-custom" required placeholder="50000" step="0.01"/>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">HRA (Rs.)</label>
+            <input type="number" name="hra" class="form-control-custom" placeholder="0" step="0.01"/>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">Allowances (Rs.)</label>
+            <input type="number" name="allowances" class="form-control-custom" placeholder="0" step="0.01"/>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">PF %</label>
+            <input type="number" name="pf_percentage" class="form-control-custom" placeholder="12" value="12" step="0.01"/>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label-custom">Tax Rate %</label>
+            <input type="number" name="tax_rate" class="form-control-custom" placeholder="10" value="10" step="0.01"/>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="col-lg-4">
+
+      <!-- Login Credentials (only on Add) -->
+      {% if not employee %}
+      <div class="form-card mb-3">
+        <div class="form-section-title"><i class="bi bi-lock-fill me-2" style="color:var(--accent);"></i>Login Credentials</div>
+        <div class="mb-3">
+          <label class="form-label-custom">Username *</label>
+          <input type="text" name="username" class="form-control-custom" required placeholder="username"/>
+        </div>
+        <div class="mb-3">
+          <label class="form-label-custom">Password *</label>
+          <input type="password" name="password" class="form-control-custom" required placeholder="Min 8 characters"/>
+        </div>
+        <div>
+          <label class="form-label-custom">Role *</label>
+          <select name="role" class="form-control-custom">
+            <option value="employee">Employee</option>
+            <option value="hr">HR</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Actions -->
+      <div class="form-card">
+        <button type="submit" class="btn-accent w-100 justify-content-center mb-2" style="padding:12px;">
+          <i class="bi bi-{% if employee %}check-circle{% else %}person-plus{% endif %}-fill"></i>
+          {% if employee %}Save Changes{% else %}Add Employee{% endif %}
+        </button>
+        <a href="{% url 'employee_list' %}" class="btn-outline-custom w-100 justify-content-center" style="padding:12px;">
+          <i class="bi bi-x-circle"></i> Cancel
+        </a>
+        {% if employee %}
+        <hr style="border-color:var(--border);margin:16px 0;"/>
+        <a href="{% url 'employee_delete' employee.pk %}"
+           class="btn-outline-custom w-100 justify-content-center"
+           style="color:var(--accent);border-color:#fecaca;padding:10px;">
+          <i class="bi bi-trash"></i> Delete Employee
+        </a>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</form>
+{% endblock %}

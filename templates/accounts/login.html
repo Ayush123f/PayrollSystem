@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login – PayrollPro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --brand: #1a1a2e;
+      --accent: #e94560;
+      --border: #e6e8f0;
+      --muted: #7a7f9a;
+      --text: #1a1a2e;
+      --font-head: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); min-height: 100vh; display: flex; background: #f4f5f9; }
+
+    /* LEFT PANEL */
+    .login-left {
+      flex: 1;
+      background: var(--brand);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .login-left::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: rgba(233,69,96,0.12);
+    }
+    .login-left::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; left: 60px;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+    }
+    .logo-mark {
+      width: 50px; height: 50px;
+      border-radius: 14px;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-head);
+      font-size: 22px; font-weight: 800;
+      color: #fff; margin-bottom: 30px;
+    }
+    .login-left h2 {
+      font-family: var(--font-head);
+      font-size: 36px; font-weight: 800;
+      color: #fff; line-height: 1.2;
+      margin-bottom: 16px;
+      position: relative; z-index: 1;
+    }
+    .login-left h2 span { color: var(--accent); }
+    .login-left p {
+      font-size: 15px;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.7; max-width: 360px;
+      position: relative; z-index: 1;
+    }
+    .feature-pills {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      margin-top: 36px;
+      position: relative; z-index: 1;
+    }
+    .feature-pill {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.65);
+      border-radius: 20px; padding: 6px 14px;
+      font-size: 12.5px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .feature-pill i { color: var(--accent); }
+
+    /* RIGHT PANEL */
+    .login-right {
+      width: 460px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      padding: 60px 48px;
+      background: #fff;
+    }
+    .login-form-wrap { width: 100%; max-width: 360px; }
+    .login-form-wrap h3 {
+      font-family: var(--font-head);
+      font-size: 24px; font-weight: 700;
+      color: var(--text); margin-bottom: 6px;
+    }
+    .login-form-wrap p {
+      font-size: 13.5px;
+      color: var(--muted);
+      margin-bottom: 30px;
+    }
+    .form-group { margin-bottom: 18px; }
+    .form-label-custom {
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--text);
+      display: block; margin-bottom: 7px;
+    }
+    .input-wrap { position: relative; }
+    .input-wrap i {
+      position: absolute; left: 14px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted); font-size: 15px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 11px 14px 11px 40px;
+      border: 1.5px solid var(--border);
+      border-radius: 11px;
+      font-size: 14px;
+      font-family: var(--font-body);
+      color: var(--text);
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(233,69,96,0.08);
+    }
+    .form-input::placeholder { color: #b8bcd0; }
+    .btn-login {
+      width: 100%; padding: 13px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 11px;
+      font-size: 14px; font-weight: 600;
+      font-family: var(--font-head);
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-top: 8px;
+    }
+    .btn-login:hover { background: #d03550; }
+    .login-footer {
+      margin-top: 28px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    @media (max-width: 768px) {
+      .login-left { display: none; }
+      .login-right { width: 100%; padding: 40px 28px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LEFT BRANDING PANEL -->
+  <div class="login-left">
+    <div class="logo-mark">P</div>
+    <h2>Smart <span>Payroll</span><br>Management</h2>
+    <p>Automate your HR and payroll workflows. From salary calculations to payslip generation — all in one place.</p>
+    <div class="feature-pills">
+      <div class="feature-pill"><i class="bi bi-check-circle-fill"></i> Automated Payroll</div>
+      <div class="feature-pill"><i class="bi bi-check-circle-fill"></i> Leave Management</div>
+      <div class="feature-pill"><i class="bi bi-check-circle-fill"></i> PDF Payslips</div>
+      <div class="feature-pill"><i class="bi bi-check-circle-fill"></i> Tax Calculation</div>
+      <div class="feature-pill"><i class="bi bi-check-circle-fill"></i> Attendance Tracker</div>
+    </div>
+  </div>
+
+  <!-- RIGHT LOGIN FORM -->
+  <div class="login-right">
+    <div class="login-form-wrap">
+      <h3>Welcome back</h3>
+      <p>Sign in to your PayrollPro account</p>
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger" style="border-radius:10px;font-size:13px;padding:10px 14px;margin-bottom:18px;">
+          <i class="bi bi-exclamation-circle-fill me-2"></i>
+          {{ form.non_field_errors.0 }}
+        </div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label class="form-label-custom">Username</label>
+          <div class="input-wrap">
+            <i class="bi bi-person"></i>
+            <input type="text"
+                   name="username"
+                   class="form-input"
+                   placeholder="Enter your username"
+                   value="{{ form.username.value|default:'' }}"
+                   required/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label-custom">Password</label>
+          <div class="input-wrap">
+            <i class="bi bi-lock"></i>
+            <input type="password"
+                   name="password"
+                   class="form-input"
+                   placeholder="Enter your password"
+                   required/>
+          </div>
+        </div>
+
+        <input type="hidden" name="next" value="{{ next }}"/>
+        <button type="submit" class="btn-login">Sign In</button>
+      </form>
+
+      <div class="login-footer">
+        PayrollPro &nbsp;·&nbsp; Final Year Project &nbsp;·&nbsp; &copy; 2026
+      </div>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

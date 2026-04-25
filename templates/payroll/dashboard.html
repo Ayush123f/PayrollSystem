@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Welcome back, {{ request.user.first_name }} · {{ today|date:"F Y" }}{% endblock %}
+
+{% block content %}
+
+<!-- STAT CARDS -->
+<div class="row g-3 mb-4">
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card accent-red">
+      <div class="stat-label">Total Payroll</div>
+      <div class="stat-value">Rs. {{ total_payroll|intcomma }}</div>
+      <div class="stat-sub">This month</div>
+      <div class="stat-icon red"><i class="bi bi-currency-dollar"></i></div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card accent-blue">
+      <div class="stat-label">Total Employees</div>
+      <div class="stat-value">{{ total_employees }}</div>
+      <div class="stat-sub"><span style="color:#22c55e;">+{{ new_employees_this_month }}</span> new this month</div>
+      <div class="stat-icon blue"><i class="bi bi-people-fill"></i></div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card accent-green">
+      <div class="stat-label">Payslips Generated</div>
+      <div class="stat-value">{{ payslips_generated }}</div>
+      <div class="stat-sub"><span style="color:#e94560;">{{ payslips_pending }}</span> pending</div>
+      <div class="stat-icon green"><i class="bi bi-file-earmark-check-fill"></i></div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="stat-card accent-amber">
+      <div class="stat-label">Leave Requests</div>
+      <div class="stat-value">{{ pending_leaves }}</div>
+      <div class="stat-sub">Pending approval</div>
+      <div class="stat-icon amber"><i class="bi bi-hourglass-split"></i></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN GRID -->
+<div class="row g-3">
+
+  <!-- RECENT PAYROLL TABLE -->
+  <div class="col-xl-8">
+    <div class="card-panel">
+      <div class="card-panel-header">
+        <h5>Recent Payroll</h5>
+        <div class="d-flex gap-2">
+          <a href="{% url 'payroll_list' %}" class="btn-outline-custom">
+            <i class="bi bi-eye"></i> View All
+          </a>
+          <a href="{% url 'payroll_run' %}" class="btn-accent">
+            <i class="bi bi-play-fill"></i> Run Payroll
+          </a>
+        </div>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Employee</th>
+            <th>Department</th>
+            <th>Gross</th>
+            <th>Deductions</th>
+            <th>Net Pay</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in recent_payrolls %}
+          <tr>
+            <td>
+              <div class="emp-cell">
+                <div class="emp-av" style="background:{{ p.employee.avatar_color }};">
+                  {{ p.employee.initials }}
+                </div>
+                <div>
+                  <div style="font-weight:500;">{{ p.employee.user.get_full_name }}</div>
+                  <div style="font-size:11.5px;color:var(--muted);">{{ p.employee.employee_id }}</div>
+                </div>
+              </div>
+            </td>
+            <td style="color:var(--muted);">{{ p.employee.department.name|default:"—" }}</td>
+            <td>Rs. {{ p.gross_salary|intcomma }}</td>
+            <td style="color:#e94560;">Rs. {{ p.total_deduction|intcomma }}</td>
+            <td style="font-weight:600;">Rs. {{ p.net_salary|intcomma }}</td>
+            <td><span class="badge-status badge-{{ p.status }}">{{ p.get_status_display }}</span></td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <i class="bi bi-cash-stack"></i>
+                <h6>No payroll records yet</h6>
+                <p>Run payroll to generate records.</p>
+                <a href="{% url 'payroll_run' %}" class="btn-accent mt-3" style="display:inline-flex;">
+                  <i class="bi bi-play-fill"></i> Run Payroll
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="col-xl-4 d-flex flex-column gap-3">
+
+    <!-- MONTHLY CHART -->
+    <div class="card-panel p-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <span style="font-family:var(--font-head);font-size:14px;font-weight:700;">Monthly Trend</span>
+        <span style="font-size:12px;color:var(--muted);">{{ today.year }}</span>
+      </div>
+      <canvas id="payrollChart" height="80"></canvas>
+    </div>
+
+    <!-- LEAVE REQUESTS -->
+    <div class="card-panel" style="flex:1;">
+      <div class="card-panel-header">
+        <h5>Leave Requests</h5>
+        <a href="{% url 'leave_list' %}" style="font-size:12px;color:var(--accent);text-decoration:none;">View all</a>
+      </div>
+      <div style="padding:0 20px;">
+        {% for leave in pending_leave_requests %}
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);">
+          <div class="d-flex align-items-center gap-2">
+            <div style="width:8px;height:8px;border-radius:50%;background:{{ leave.dot_color }};flex-shrink:0;"></div>
+            <div>
+              <div style="font-size:13.5px;font-weight:500;">{{ leave.employee.user.get_full_name }}</div>
+              <div style="font-size:11.5px;color:var(--muted);">{{ leave.get_leave_type_display }} · {{ leave.days }} day{{ leave.days|pluralize }}</div>
+            </div>
+          </div>
+          <div class="d-flex gap-1">
+            <form method="post" action="{% url 'leave_approve' leave.pk %}">
+              {% csrf_token %}
+              <button type="submit" style="width:28px;height:28px;border-radius:8px;border:none;background:#f0fdf4;color:#16a34a;font-size:13px;cursor:pointer;">✓</button>
+            </form>
+            <form method="post" action="{% url 'leave_reject' leave.pk %}">
+              {% csrf_token %}
+              <button type="submit" style="width:28px;height:28px;border-radius:8px;border:none;background:#fff0f0;color:#e94560;font-size:13px;cursor:pointer;">✕</button>
+            </form>
+          </div>
+        </div>
+        {% empty %}
+        <div style="padding:24px 0;text-align:center;color:var(--muted);font-size:13px;">
+          <i class="bi bi-check-circle" style="font-size:24px;display:block;margin-bottom:8px;"></i>
+          No pending leave requests
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const ctx = document.getElementById('payrollChart');
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: {{ monthly_labels|safe }},
+    datasets: [{
+      data: {{ monthly_amounts|safe }},
+      backgroundColor: {{ monthly_amounts|safe }}.map((_, i) =>
+        i === {{ monthly_amounts|safe }}.length - 1 ? '#e94560' : 'rgba(233,69,96,0.25)'
+      ),
+      borderRadius: 4,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: { x: { display: false }, y: { display: false } }
+  }
+});
+</script>
+{% endblock %}

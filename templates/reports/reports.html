@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Reports{% endblock %}
+{% block page_title %}Reports{% endblock %}
+{% block page_subtitle %}Payroll and HR analytics{% endblock %}
+
+{% block content %}
+
+<!-- SUMMARY CARD -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="stat-card accent-blue">
+      <div class="stat-label">Total Active Employees</div>
+      <div class="stat-value">{{ total_employees }}</div>
+      <div class="stat-icon blue"><i class="bi bi-people-fill"></i></div>
+    </div>
+  </div>
+</div>
+
+<!-- DEPARTMENT SUMMARY -->
+<div class="card-panel">
+  <div class="card-panel-header">
+    <h5>Department Summary</h5>
+  </div>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Department</th>
+        <th>Head Count</th>
+        <th>Total Salary</th>
+        <th>Avg. Salary</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for dept in departments %}
+      <tr>
+        <td style="font-weight:500;">{{ dept.name }}</td>
+        <td>{{ dept.headcount }}</td>
+        <td>Rs. {{ dept.total_salary|floatformat:0|intcomma }}</td>
+        <td>Rs. {{ dept.avg_salary|floatformat:0|intcomma }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4">
+          <div class="empty-state">
+            <i class="bi bi-bar-chart-line"></i>
+            <h6>No data available</h6>
+            <p>Add departments and employees to see reports.</p>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

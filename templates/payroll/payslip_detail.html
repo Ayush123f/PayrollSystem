@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Payslip - {{ payroll.employee.user.get_full_name }}{% endblock %}
+{% block page_title %}Payslip{% endblock %}
+{% block page_subtitle %}{{ payroll.get_month_display }} {{ payroll.year }} · {{ payroll.employee.employee_id }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  @media print {
+    .sidebar, .topbar, .alerts-wrapper, .print-hide { display: none !important; }
+    .main-content { margin-left: 0 !important; }
+    .page-body { padding: 0 !important; }
+  }
+  .ps-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+    padding: 32px 36px; border-radius: 16px 16px 0 0;
+    position: relative; overflow: hidden;
+  }
+  .ps-header::before {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 240px; height: 240px; border-radius: 50%;
+    background: rgba(233,69,96,0.12);
+  }
+  .item-row { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px dashed var(--border); }
+  .item-row:last-child { border-bottom: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:800px;margin:0 auto;">
+
+  <!-- ACTION BUTTONS -->
+  <div class="d-flex gap-2 mb-3 print-hide">
+    <a href="{% url 'payslip_list' %}" class="btn-outline-custom">
+      <i class="bi bi-arrow-left"></i> Back
+    </a>
+    <button onclick="window.print()" class="btn-outline-custom">
+      <i class="bi bi-printer"></i> Print
+    </button>
+    <a href="{% url 'payslip_pdf' payroll.pk %}" class="btn-accent ms-auto">
+      <i class="bi bi-download"></i> Download PDF
+    </a>
+  </div>
+
+  <!-- PAYSLIP CARD -->
+  <div class="card-panel">
+
+    <!-- HEADER -->
+    <div class="ps-header">
+      <div class="d-flex justify-content-between align-items-start" style="position:relative;z-index:2;">
+        <div>
+          <div style="font-family:var(--font-head);font-size:22px;font-weight:800;color:#fff;">
+            {{ company_name }}
+          </div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;">
+            {{ company_address }} · {{ company_email }}
+          </div>
+          <div style="margin-top:20px;">
+            <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.38);">Salary Payslip</div>
+            <div style="font-family:var(--font-head);font-size:26px;font-weight:700;color:#fff;margin-top:4px;">
+              {{ payroll.get_month_display }} {{ payroll.year }}
+            </div>
+            <span style="display:inline-block;background:rgba(34,197,94,0.2);color:#4ade80;border:1px solid rgba(34,197,94,0.3);border-radius:20px;padding:3px 12px;font-size:11.5px;margin-top:8px;">
+              {{ payroll.get_status_display }}
+            </span>
+          </div>
+        </div>
+        <div style="text-align:right;position:relative;z-index:2;">
+          <div style="width:54px;height:54px;background:var(--accent);border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:22px;font-weight:800;color:#fff;margin-left:auto;">P</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:10px;">Payslip No.</div>
+          <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);">PSL-{{ payroll.year }}-{{ payroll.pk|stringformat:"04d" }}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:6px;">Generated</div>
+          <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);">{{ payroll.generated_on|date:"d M Y" }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPLOYEE INFO -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border);">
+      <div style="padding:18px 24px;border-right:1px solid var(--border);">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:5px;">Employee</div>
+        <div style="font-size:14px;font-weight:500;">{{ payroll.employee.user.get_full_name }}</div>
+        <div style="font-size:12px;color:var(--muted);">{{ payroll.employee.employee_id }} · {{ payroll.employee.get_employee_type_display }}</div>
+      </div>
+      <div style="padding:18px 24px;border-right:1px solid var(--border);">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:5px;">Department</div>
+        <div style="font-size:14px;font-weight:500;">{{ payroll.employee.department.name|default:"—" }}</div>
+        <div style="font-size:12px;color:var(--muted);">{{ payroll.employee.designation.title|default:"—" }}</div>
+      </div>
+      <div style="padding:18px 24px;">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:5px;">Working Days</div>
+        <div style="font-size:14px;font-weight:500;">{{ payroll.working_days }} / {{ payroll.total_working_days }}</div>
+        <div style="font-size:12px;color:var(--muted);">{{ payroll.leaves_taken }} leave{{ payroll.leaves_taken|pluralize }} taken</div>
+      </div>
+    </div>
+
+    <!-- EARNINGS & DEDUCTIONS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border);">
+      <!-- EARNINGS -->
+      <div style="padding:24px 28px;border-right:1px solid var(--border);">
+        <div style="font-family:var(--font-head);font-size:13px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+          <div style="width:8px;height:8px;border-radius:50%;background:#22c55e;"></div> Earnings
+        </div>
+        <div class="item-row">
+          <span style="font-size:13.5px;">Basic Salary</span>
+          <span style="font-size:13.5px;font-weight:500;color:#16a34a;">Rs. {{ payroll.salary_structure.basic_salary|intcomma }}</span>
+        </div>
+        <div class="item-row">
+          <span style="font-size:13.5px;">HRA</span>
+          <span style="font-size:13.5px;font-weight:500;color:#16a34a;">Rs. {{ payroll.salary_structure.hra|intcomma }}</span>
+        </div>
+        <div class="item-row">
+          <span style="font-size:13.5px;">Allowances</span>
+          <span style="font-size:13.5px;font-weight:500;color:#16a34a;">Rs. {{ payroll.salary_structure.allowances|intcomma }}</span>
+        </div>
+        {% if payroll.bonus %}
+        <div class="item-row">
+          <span style="font-size:13.5px;">Bonus</span>
+          <span style="font-size:13.5px;font-weight:500;color:#16a34a;">Rs. {{ payroll.bonus|intcomma }}</span>
+        </div>
+        {% endif %}
+        <div style="display:flex;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:2px solid var(--border);">
+          <span style="font-size:13px;font-weight:600;color:var(--muted);">Gross Earnings</span>
+          <span style="font-size:14px;font-weight:700;">Rs. {{ payroll.gross_salary|intcomma }}</span>
+        </div>
+      </div>
+
+      <!-- DEDUCTIONS -->
+      <div style="padding:24px 28px;">
+        <div style="font-family:var(--font-head);font-size:13px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+          <div style="width:8px;height:8px;border-radius:50%;background:#e94560;"></div> Deductions
+        </div>
+        <div class="item-row">
+          <span style="font-size:13.5px;">Income Tax ({{ payroll.salary_structure.tax_rate }}%)</span>
+          <span style="font-size:13.5px;font-weight:500;color:#e94560;">− Rs. {{ payroll.tax_deduction|intcomma }}</span>
+        </div>
+        <div class="item-row">
+          <span style="font-size:13.5px;">Provident Fund ({{ payroll.salary_structure.pf_percentage }}%)</span>
+          <span style="font-size:13.5px;font-weight:500;color:#e94560;">− Rs. {{ payroll.pf_deduction|intcomma }}</span>
+        </div>
+        {% if payroll.loan_deduction %}
+        <div class="item-row">
+          <span style="font-size:13.5px;">Loan Deduction</span>
+          <span style="font-size:13.5px;font-weight:500;color:#e94560;">− Rs. {{ payroll.loan_deduction|intcomma }}</span>
+        </div>
+        {% endif %}
+        <div style="display:flex;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:2px solid var(--border);">
+          <span style="font-size:13px;font-weight:600;color:var(--muted);">Total Deductions</span>
+          <span style="font-size:14px;font-weight:700;color:#e94560;">Rs. {{ payroll.total_deduction|intcomma }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- NET PAY -->
+    <div style="background:#fafbfd;padding:24px 36px;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:var(--font-head);font-size:15px;font-weight:700;">Net Pay</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">
+          Generated on {{ payroll.generated_on|date:"d M Y" }}
+        </div>
+      </div>
+      <div style="font-family:var(--font-head);font-size:34px;font-weight:800;">
+        <span style="font-size:16px;color:var(--muted);font-weight:400;margin-right:4px;">Rs.</span>{{ payroll.net_salary|intcomma }}
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div style="padding:14px 36px;border-top:1px solid var(--border);text-align:center;font-size:12px;color:var(--muted);">
+      This is a computer-generated payslip. No signature required.
+      For queries contact: {{ company_email }}
+    </div>
+
+  </div>
+</div>
+{% endblock %} 

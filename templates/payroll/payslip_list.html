@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Payslips{% endblock %}
+{% block page_title %}Payslips{% endblock %}
+{% block page_subtitle %}View and download payslips{% endblock %}
+
+{% block content %}
+<div class="card-panel">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Employee</th>
+        <th>Month/Year</th>
+        <th>Gross</th>
+        <th>Net Pay</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in payrolls %}
+      <tr>
+        <td>
+          <div class="emp-cell">
+            <div class="emp-av" style="background:{{ p.employee.avatar_color }};">
+              {{ p.employee.initials }}
+            </div>
+            <div>
+              <div style="font-weight:500;">{{ p.employee.user.get_full_name }}</div>
+              <div style="font-size:11.5px;color:var(--muted);">{{ p.employee.employee_id }}</div>
+            </div>
+          </div>
+        </td>
+        <td style="font-weight:500;">{{ p.get_month_display }} {{ p.year }}</td>
+        <td>Rs. {{ p.gross_salary|intcomma }}</td>
+        <td style="font-weight:600;color:#16a34a;">Rs. {{ p.net_salary|intcomma }}</td>
+        <td>
+          <span class="badge-status badge-{{ p.status }}">
+            {{ p.get_status_display }}
+          </span>
+        </td>
+        <td>
+          <div class="d-flex gap-1">
+            <a href="{% url 'payslip_detail' p.pk %}" class="act-btn" title="View">
+              <i class="bi bi-eye"></i>
+            </a>
+            <a href="{% url 'payslip_pdf' p.pk %}" class="act-btn" title="Download PDF">
+              <i class="bi bi-download"></i>
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6">
+          <div class="empty-state">
+            <i class="bi bi-file-earmark-text"></i>
+            <h6>No payslips yet</h6>
+            <p>Run payroll first to generate payslips.</p>
+            <a href="{% url 'payroll_run' %}" class="btn-accent mt-3" style="display:inline-flex;">
+              <i class="bi bi-play-fill"></i> Run Payroll
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Apply Leave{% endblock %}
+{% block page_title %}Apply Leave{% endblock %}
+{% block page_subtitle %}Submit a leave request{% endblock %}
+
+{% block content %}
+<div style="max-width:500px;margin:0 auto;">
+  <div class="card-panel p-4">
+    <div class="form-section-title"><i class="bi bi-hourglass-split me-2" style="color:var(--accent);"></i>Leave Request</div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label-custom">Leave Type *</label>
+        <select name="leave_type" class="form-control-custom" required>
+          <option value="sick">Sick Leave</option>
+          <option value="casual">Casual Leave</option>
+          <option value="annual">Annual Leave</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label-custom">Start Date *</label>
+        <input type="date" name="start_date" class="form-control-custom" required/>
+      </div>
+      <div class="mb-3">
+        <label class="form-label-custom">End Date *</label>
+        <input type="date" name="end_date" class="form-control-custom" required/>
+      </div>
+      <div class="mb-4">
+        <label class="form-label-custom">Reason</label>
+        <textarea name="reason" class="form-control-custom" rows="3" placeholder="Reason for leave..."></textarea>
+      </div>
+      <button type="submit" class="btn-accent w-100 justify-content-center" style="padding:12px;">
+        <i class="bi bi-send-fill"></i> Submit Request
+      </button>
+      <a href="{% url 'leave_list' %}" class="btn-outline-custom w-100 justify-content-center mt-2" style="padding:12px;">
+        <i class="bi bi-x-circle"></i> Cancel
+      </a>
+    </form>
+  </div>
+</div>
+{% endblock %}

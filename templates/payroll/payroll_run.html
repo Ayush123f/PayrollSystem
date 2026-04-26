@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Run Payroll{% endblock %}
+{% block page_title %}Run Payroll{% endblock %}
+{% block page_subtitle %}Generate payroll for all active employees{% endblock %}
+
+{% block content %}
+<div style="max-width:500px;margin:0 auto;">
+  <div class="card-panel p-4">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="width:64px;height:64px;background:#fff0f0;border-radius:50%;
+                  display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+        <i class="bi bi-play-circle-fill" style="font-size:28px;color:var(--accent);"></i>
+      </div>
+      <h5 style="font-family:var(--font-head);font-weight:700;margin-bottom:6px;">Run Monthly Payroll</h5>
+      <p style="color:var(--muted);font-size:13.5px;">
+        Select the month and year to generate payroll for all active employees.
+      </p>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label-custom">Month *</label>
+        <select name="month" class="form-control-custom" required>
+          {% for num, name in months %}
+            <option value="{{ num }}">{{ name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="mb-4">
+        <label class="form-label-custom">Year *</label>
+        <input type="number" name="year" class="form-control-custom"
+               value="{{ current_year }}" min="2020" max="2099" required/>
+      </div>
+      <button type="submit" class="btn-accent w-100 justify-content-center" style="padding:13px;">
+        <i class="bi bi-play-fill"></i> Generate Payroll
+      </button>
+      <a href="{% url 'payroll_list' %}" class="btn-outline-custom w-100 justify-content-center mt-2" style="padding:12px;">
+        <i class="bi bi-x-circle"></i> Cancel
+      </a>
+    </form>
+  </div>
+</div>
+{% endblock %}

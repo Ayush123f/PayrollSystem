@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance{% endblock %}
+{% block page_title %}Attendance{% endblock %}
+{% block page_subtitle %}{{ current_month_name }} {{ current_year }} · {{ total_working_days }} working days{% endblock %}
+
+{% block content %}
+
+<!-- SUMMARY PILLS -->
+<div class="d-flex gap-3 mb-4 flex-wrap align-items-center">
+  <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:14px;flex:1;min-width:130px;">
+    <div style="width:40px;height:40px;border-radius:10px;background:#f0fdf4;color:#22c55e;display:flex;align-items:center;justify-content:center;font-size:17px;"><i class="bi bi-check-circle-fill"></i></div>
+    <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Present</div><div style="font-family:var(--font-head);font-size:22px;font-weight:700;">{{ present_days }}</div></div>
+  </div>
+  <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:14px;flex:1;min-width:130px;">
+    <div style="width:40px;height:40px;border-radius:10px;background:#fff0f0;color:#e94560;display:flex;align-items:center;justify-content:center;font-size:17px;"><i class="bi bi-x-circle-fill"></i></div>
+    <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Absent</div><div style="font-family:var(--font-head);font-size:22px;font-weight:700;">{{ absent_days }}</div></div>
+  </div>
+  <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:14px;flex:1;min-width:130px;">
+    <div style="width:40px;height:40px;border-radius:10px;background:#fffbeb;color:#f59e0b;display:flex;align-items:center;justify-content:center;font-size:17px;"><i class="bi bi-circle-half"></i></div>
+    <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Half Day</div><div style="font-family:var(--font-head);font-size:22px;font-weight:700;">{{ half_days }}</div></div>
+  </div>
+  <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:14px;flex:1;min-width:130px;">
+    <div style="width:40px;height:40px;border-radius:10px;background:#eff6ff;color:#3b82f6;display:flex;align-items:center;justify-content:center;font-size:17px;"><i class="bi bi-percent"></i></div>
+    <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Attendance %</div><div style="font-family:var(--font-head);font-size:22px;font-weight:700;">{{ attendance_percent }}%</div></div>
+  </div>
+  <div class="ms-auto d-flex gap-2">
+    <a href="{% url 'attendance_export' %}" class="btn-outline-custom"><i class="bi bi-download"></i> Export</a>
+    <a href="{% url 'attendance_mark' %}" class="btn-accent"><i class="bi bi-plus-lg"></i> Mark Attendance</a>
+  </div>
+</div>
+
+<div class="row g-3">
+
+  <!-- CALENDAR -->
+  <div class="col-lg-5">
+    <div class="card-panel">
+      <div class="card-panel-header">
+        <h5>{{ current_month_name }} {{ current_year }}</h5>
+        <div class="d-flex gap-2">
+          <a href="?month={{ prev_month }}&year={{ prev_year }}" style="width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;text-decoration:none;">
+            <i class="bi bi-chevron-left" style="font-size:11px;"></i>
+          </a>
+          <a href="?month={{ next_month }}&year={{ next_year }}" style="width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;text-decoration:none;">
+            <i class="bi bi-chevron-right" style="font-size:11px;"></i>
+          </a>
+        </div>
+      </div>
+      <div style="padding:16px 20px;">
+        <!-- Weekday headers -->
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;">
+          {% for day in weekday_headers %}
+          <div style="text-align:center;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;padding:5px 0;">{{ day }}</div>
+          {% endfor %}
+        </div>
+        <!-- Calendar days -->
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">
+          {% for day in calendar_days %}
+            {% if day.blank %}
+              <div></div>
+            {% else %}
+              <div style="text-align:center;padding:8px 4px;border-radius:9px;font-size:12.5px;
+                {% if day.status == 'today' %}background:#e94560;color:#fff;font-weight:700;
+                {% elif day.status == 'present' %}background:#f0fdf4;color:#16a34a;font-weight:500;
+                {% elif day.status == 'absent' %}background:#fff0f0;color:#e94560;font-weight:500;
+                {% elif day.status == 'half' %}background:#fffbeb;color:#d97706;font-weight:500;
+                {% elif day.status == 'holiday' %}background:#f1f5f9;color:#94a3b8;
+                {% else %}color:#cbd5e1;{% endif %}">
+                {{ day.day }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <!-- Legend -->
+        <div style="display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);">
+            <div style="width:10px;height:10px;border-radius:3px;background:#dcfce7;border:1.5px solid #22c55e;"></div>Present
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);">
+            <div style="width:10px;height:10px;border-radius:3px;background:#ffe4e6;border:1.5px solid #e94560;"></div>Absent
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);">
+            <div style="width:10px;height:10px;border-radius:3px;background:#fef3c7;border:1.5px solid #f59e0b;"></div>Half Day
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TODAY'S ATTENDANCE -->
+  <div class="col-lg-7">
+    <div class="card-panel">
+      <div class="card-panel-header">
+        <h5>Today's Attendance <span style="font-size:12px;color:var(--muted);font-weight:400;">{{ today|date:"d M Y" }}</span></h5>
+        <span style="font-size:13px;color:var(--muted);">{{ today_present }} / {{ today_total }} present</span>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Employee</th>
+            <th>Check In</th>
+            <th>Check Out</th>
+            <th>Hours</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in today_attendance %}
+          <tr>
+            <td>
+              <div class="emp-cell">
+                <div class="emp-av" style="background:{{ record.employee.avatar_color }};">{{ record.employee.initials }}</div>
+                <div>
+                  <div style="font-weight:500;font-size:13px;">{{ record.employee.user.get_full_name }}</div>
+                  <div style="font-size:11px;color:var(--muted);">{{ record.employee.department.name }}</div>
+                </div>
+              </div>
+            </td>
+            <td style="color:var(--muted);">{{ record.check_in|time:"h:i A"|default:"—" }}</td>
+            <td style="color:var(--muted);">{{ record.check_out|time:"h:i A"|default:"—" }}</td>
+            <td style="font-weight:500;">{% if record.hours_worked %}{{ record.hours_formatted }}{% else %}—{% endif %}</td>
+            <td>
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;
+                {% if record.status == 'present' %}background:#f0fdf4;color:#16a34a;
+                {% elif record.status == 'absent' %}background:#fff0f0;color:#e94560;
+                {% elif record.status == 'half' %}background:#fffbeb;color:#d97706;
+                {% else %}background:#f1f5f9;color:#64748b;{% endif %}">
+                {{ record.get_status_display }}
+              </span>
+            </td>
+            <td>
+              <a href="{% url 'attendance_edit' record.pk %}" class="act-btn"><i class="bi bi-pencil"></i></a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6">
+              <div class="empty-state" style="padding:32px;">
+                <i class="bi bi-calendar-x" style="font-size:32px;"></i>
+                <h6>No attendance records today</h6>
+                <a href="{% url 'attendance_mark' %}" class="btn-accent mt-2" style="display:inline-flex;">
+                  <i class="bi bi-plus-lg"></i> Mark Attendance
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Mark Attendance{% endblock %}
+{% block page_title %}Mark Attendance{% endblock %}
+{% block page_subtitle %}Record today's attendance{% endblock %}
+
+{% block content %}
+<div style="max-width:500px;margin:0 auto;">
+  <div class="card-panel p-4">
+    <div class="form-section-title"><i class="bi bi-calendar-check me-2" style="color:var(--accent);"></i>Mark Attendance</div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label-custom">Employee *</label>
+        <select name="employee" class="form-control-custom" required>
+          <option value="">Select Employee</option>
+          {% for emp in employees %}
+            <option value="{{ emp.pk }}">{{ emp.employee_id }} - {{ emp.user.get_full_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label-custom">Date *</label>
+        <input type="date" name="date" class="form-control-custom" required
+               value="{% now 'Y-m-d' %}"/>
+      </div>
+      <div class="mb-3">
+        <label class="form-label-custom">Status *</label>
+        <select name="status" class="form-control-custom" required>
+          <option value="present">Present</option>
+          <option value="absent">Absent</option>
+          <option value="half">Half Day</option>
+          <option value="holiday">Holiday</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label-custom">Check In Time</label>
+        <input type="time" name="check_in" class="form-control-custom"/>
+      </div>
+      <div class="mb-4">
+        <label class="form-label-custom">Check Out Time</label>
+        <input type="time" name="check_out" class="form-control-custom"/>
+      </div>
+      <button type="submit" class="btn-accent w-100 justify-content-center" style="padding:12px;">
+        <i class="bi bi-check-circle-fill"></i> Save Attendance
+      </button>
+      <a href="{% url 'attendance_list' %}" class="btn-outline-custom w-100 justify-content-center mt-2" style="padding:12px;">
+        <i class="bi bi-x-circle"></i> Cancel
+      </a>
+    </form>
+  </div>
+</div>
+{% endblock %}

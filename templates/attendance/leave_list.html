@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Leave Requests{% endblock %}
+{% block page_title %}Leave Requests{% endblock %}
+{% block page_subtitle %}Manage employee leave{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-end mb-4">
+  <a href="{% url 'leave_apply' %}" class="btn-accent">
+    <i class="bi bi-plus-lg"></i> Apply Leave
+  </a>
+</div>
+
+<div class="card-panel">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Employee</th>
+        <th>Leave Type</th>
+        <th>From</th>
+        <th>To</th>
+        <th>Days</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for leave in leaves %}
+      <tr>
+        <td>
+          <div class="emp-cell">
+            <div class="emp-av" style="background:{{ leave.employee.avatar_color }};">{{ leave.employee.initials }}</div>
+            <div style="font-weight:500;">{{ leave.employee.user.get_full_name }}</div>
+          </div>
+        </td>
+        <td>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:{{ leave.dot_color }};"></div>
+            {{ leave.get_leave_type_display }}
+          </div>
+        </td>
+        <td style="color:var(--muted);">{{ leave.start_date|date:"d M Y" }}</td>
+        <td style="color:var(--muted);">{{ leave.end_date|date:"d M Y" }}</td>
+        <td style="font-weight:500;">{{ leave.days }} day{{ leave.days|pluralize }}</td>
+        <td>
+          <span class="badge-status badge-{{ leave.status }}">
+            {{ leave.get_status_display }}
+          </span>
+        </td>
+        <td>
+          {% if leave.status == 'pending' and request.user.is_hr_or_admin %}
+          <div class="d-flex gap-1">
+            <form method="post" action="{% url 'leave_approve' leave.pk %}">
+              {% csrf_token %}
+              <button type="submit" style="width:30px;height:30px;border-radius:8px;border:none;background:#f0fdf4;color:#16a34a;font-size:13px;cursor:pointer;" title="Approve">✓</button>
+            </form>
+            <form method="post" action="{% url 'leave_reject' leave.pk %}">
+              {% csrf_token %}
+              <button type="submit" style="width:30px;height:30px;border-radius:8px;border:none;background:#fff0f0;color:#e94560;font-size:13px;cursor:pointer;" title="Reject">✕</button>
+            </form>
+          </div>
+          {% else %}
+          <span style="color:var(--muted);font-size:13px;">—</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7">
+          <div class="empty-state">
+            <i class="bi bi-calendar-x"></i>
+            <h6>No leave requests yet</h6>
+            <a href="{% url 'leave_apply' %}" class="btn-accent mt-3" style="display:inline-flex;">
+              <i class="bi bi-plus-lg"></i> Apply Leave
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

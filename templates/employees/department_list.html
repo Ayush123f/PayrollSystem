@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Departments{% endblock %}
+{% block page_title %}Departments{% endblock %}
+{% block page_subtitle %}{{ departments.count }} departments{% endblock %}
+
+{% block content %}
+
+<div class="card-panel">
+  <div class="card-panel-header">
+    <h5>All Departments</h5>
+  </div>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Department</th>
+        <th>Description</th>
+        <th>Employees</th>
+        <th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for dept in departments %}
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:var(--accent);opacity:0.15;display:flex;align-items:center;justify-content:center;">
+              <i class="bi bi-building" style="color:var(--accent);opacity:1;font-size:16px;"></i>
+            </div>
+            <span style="font-weight:500;">{{ dept.name }}</span>
+          </div>
+        </td>
+        <td style="color:var(--muted);">{{ dept.description|default:"—" }}</td>
+        <td>
+          <span class="badge-status badge-active">{{ dept.employee_count }} employees</span>
+        </td>
+        <td style="color:var(--muted);">{{ dept.created_at|date:"d M Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4">
+          <div class="empty-state">
+            <i class="bi bi-building"></i>
+            <h6>No departments yet</h6>
+            <p>Add departments from the admin panel.</p>
+            <a href="{% url 'admin:employees_department_add' %}" class="btn-accent mt-3" style="display:inline-flex;">
+              <i class="bi bi-plus-lg"></i> Add Department
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
